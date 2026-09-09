@@ -1,0 +1,22 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Privacy checks
+        run: Scripts/check_repository.sh
+      - name: Test
+        run: swift test
+      - name: Package application
+        run: Scripts/package_app.sh
+      - name: Verify bundle
+        run: |
+          plutil -lint "dist/Codex Usage Bar.app/Contents/Info.plist"
+          codesign --verify --deep --strict "dist/Codex Usage Bar.app"

@@ -1,0 +1,27 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Privacy checks
+        run: Scripts/check_repository.sh
+      - name: Test
+        run: swift test
+      - name: Build application
+        run: CODEX_USAGE_BAR_VERSION="${GITHUB_REF_NAME#v}" Scripts/package_app.sh
+      - name: Create archive
+        run: ditto -c -k --sequesterRsrc --keepParent "dist/Codex Usage Bar.app" "dist/Codex-Usage-Bar.zip"
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" "dist/Codex-Usage-Bar.zip" --generate-notes --verify-tag
