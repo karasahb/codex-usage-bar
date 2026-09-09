@@ -51,23 +51,46 @@ final class UpdateChecker: ObservableObject {
     )!
     private static let interval: TimeInterval = 6 * 60 * 60
 
+    private let settings: AppSettings
     private let currentVersion: String
     private let session: URLSession
     private var timer: Timer?
     private var requestTask: Task<Void, Never>?
+    private var isStarted = false
+    private var settingsObservers = Set<AnyCancellable>()
 
     init(
+        settings: AppSettings,
         currentVersion: String = Bundle.main.object(
             forInfoDictionaryKey: "CFBundleShortVersionString"
         ) as? String ?? "0.0.0",
         session: URLSession = .shared
     ) {
+        self.settings = settings
         self.currentVersion = currentVersion
         self.session = session
+
+        settings.$automaticUpdateChecks
+            .dropFirst()
+            .removeDuplicates()
+            .sink { [weak self] _ in
+                Task { @MainActor in self?.scheduleAutomaticChecks() }
+            }
+            .store(in: &settingsObservers)
     }
 
     func start() {
-        guard timer == nil else { return }
+        guard !isStarted else { return }
+        isStarted = true
+        scheduleAutomaticChecks()
+    }
+
+    private func scheduleAutomaticChecks() {
+        guard isStarted else { return }
+        timer?.invalidate()
+        timer = nil
+
+        guard settings.automaticUpdateChecks else { return }
         check()
         timer = Timer.scheduledTimer(withTimeInterval: Self.interval, repeats: true) { [weak self] _ in
             Task { @MainActor in self?.check() }
@@ -76,6 +99,7 @@ final class UpdateChecker: ObservableObject {
     }
 
     func stop() {
+        isStarted = false
         timer?.invalidate()
         timer = nil
         requestTask?.cancel()

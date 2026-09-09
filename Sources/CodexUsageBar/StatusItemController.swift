@@ -5,13 +5,15 @@ import SwiftUI
 @MainActor
 final class StatusItemController: NSObject {
     private let store: UsageStore
+    private let settings: AppSettings
     private let updateChecker: UpdateChecker
     private let statusItem: NSStatusItem
     private let popover = NSPopover()
     private var cancellables = Set<AnyCancellable>()
 
-    init(store: UsageStore, updateChecker: UpdateChecker) {
+    init(store: UsageStore, settings: AppSettings, updateChecker: UpdateChecker) {
         self.store = store
+        self.settings = settings
         self.updateChecker = updateChecker
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         super.init()
@@ -35,6 +37,12 @@ final class StatusItemController: NSObject {
             .sink { [weak self] snapshot in self?.updateTitle(snapshot) }
             .store(in: &cancellables)
 
+        settings.$menuBarDisplayMode
+            .combineLatest(settings.$weeklyFirst)
+            .dropFirst()
+            .sink { [weak self] _ in self?.updateTitle(store.snapshot) }
+            .store(in: &cancellables)
+
         updateTitle(nil)
     }
 
@@ -56,22 +64,35 @@ final class StatusItemController: NSObject {
             .font: NSFont.monospacedDigitSystemFont(ofSize: 12, weight: .medium)
         ]
 
-        append(label: "", window: snapshot?.fiveHour, to: title, base: base)
-        var separatorAttributes = base
-        separatorAttributes[.foregroundColor] = NSColor.secondaryLabelColor
-        title.append(NSAttributedString(string: " | ", attributes: separatorAttributes))
-        append(label: "", window: snapshot?.weekly, to: title, base: base)
+        let windows: [RateLimitWindow?]
+        switch settings.menuBarDisplayMode {
+        case .fiveHour:
+            windows = [snapshot?.fiveHour]
+        case .weekly:
+            windows = [snapshot?.weekly]
+        case .both:
+            windows = settings.weeklyFirst
+                ? [snapshot?.weekly, snapshot?.fiveHour]
+                : [snapshot?.fiveHour, snapshot?.weekly]
+        }
+
+        for (index, window) in windows.enumerated() {
+            if index > 0 {
+                var separatorAttributes = base
+                separatorAttributes[.foregroundColor] = NSColor.secondaryLabelColor
+                title.append(NSAttributedString(string: " | ", attributes: separatorAttributes))
+            }
+            append(window: window, to: title, base: base)
+        }
         button.attributedTitle = title
         button.setAccessibilityLabel(accessibilityLabel(snapshot))
     }
 
     private func append(
-        label: String,
         window: RateLimitWindow?,
         to title: NSMutableAttributedString,
         base: [NSAttributedString.Key: Any]
     ) {
-        title.append(NSAttributedString(string: label, attributes: base))
         guard let window else {
             var attributes = base
             attributes[.foregroundColor] = NSColor.secondaryLabelColor
@@ -92,13 +113,26 @@ final class StatusItemController: NSObject {
             )
         }
         let unknown = L10n.string("usage.unknown", fallback: "unknown")
-        let five = snapshot.fiveHour?.remainingPercent.description ?? unknown
-        let week = snapshot.weekly?.remainingPercent.description ?? unknown
+        let five = L10n.format(
+            "usage.accessibility_five_hour",
+            fallback: "5-hour %@ percent",
+            snapshot.fiveHour?.remainingPercent.description ?? unknown
+        )
+        let week = L10n.format(
+            "usage.accessibility_weekly",
+            fallback: "weekly %@ percent",
+            snapshot.weekly?.remainingPercent.description ?? unknown
+        )
+        let values: [String]
+        switch settings.menuBarDisplayMode {
+        case .fiveHour: values = [five]
+        case .weekly: values = [week]
+        case .both: values = settings.weeklyFirst ? [week, five] : [five, week]
+        }
         return L10n.format(
-            "usage.accessibility",
-            fallback: "Remaining Codex usage: 5-hour %@ percent, weekly %@ percent",
-            five,
-            week
+            "usage.accessibility_custom",
+            fallback: "Remaining Codex usage: %@",
+            values.joined(separator: ", ")
         )
     }
 }

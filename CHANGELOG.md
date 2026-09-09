@@ -16,6 +16,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - English and Turkish application localization
 - Developer ID signing, hardened runtime, notarization, stapling, and checksum release automation
 - Release installation and first-launch instructions
+- Configurable menu bar limit selection and percentage order
+- Reset countdowns beside exact reset dates and times
+- Opt-in notifications when either remaining limit crosses below 25%
+- Applications-folder warning and launch-at-login choice during onboarding
+- Automatic update-check opt-out with manual checks still available
+- Privacy-safe copyable diagnostics and About links
+- Ad-hoc GitHub release fallback when Developer ID secrets are unavailable
 
 ## [1.0.0] - 2026-09-09
 

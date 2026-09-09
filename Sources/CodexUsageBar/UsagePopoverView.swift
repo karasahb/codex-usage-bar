@@ -188,7 +188,7 @@ private struct UsageWindowCard: View {
                     L10n.format(
                         "usage.resets",
                         fallback: "Resets: %@",
-                        ResetDateFormatter.string(for: window?.resetDate)
+                        ResetDateFormatter.resetDescription(for: window?.resetDate)
                     )
                 )
             }

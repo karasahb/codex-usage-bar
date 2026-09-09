@@ -44,4 +44,25 @@ final class UsageModelsTests: XCTestCase {
         XCTAssertEqual(display.planType, "plus")
         XCTAssertEqual(display.resetCreditCount, 1)
     }
+
+    func testResetDescriptionIncludesExactTimeAndCountdown() {
+        let now = Date(timeIntervalSince1970: 1_800_000_000)
+        let reset = now.addingTimeInterval((2 * 60 * 60) + (30 * 60))
+
+        let result = ResetDateFormatter.resetDescription(for: reset, relativeTo: now)
+
+        XCTAssertNotEqual(result, "—")
+        XCTAssertTrue(result.contains("("))
+        XCTAssertTrue(result.contains(")"))
+    }
+
+    func testPastResetUsesNowInsteadOfNegativeCountdown() {
+        let now = Date(timeIntervalSince1970: 1_800_000_000)
+        let reset = now.addingTimeInterval(-60)
+
+        XCTAssertEqual(
+            ResetDateFormatter.countdown(until: reset, relativeTo: now),
+            L10n.string("date.now", fallback: "now")
+        )
+    }
 }

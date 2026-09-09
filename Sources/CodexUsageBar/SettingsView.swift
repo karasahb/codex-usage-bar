@@ -6,9 +6,12 @@ struct SettingsView: View {
     @ObservedObject var store: UsageStore
     @ObservedObject var launchAtLogin: LaunchAtLoginManager
     @ObservedObject var updateChecker: UpdateChecker
+    @ObservedObject var notificationManager: UsageNotificationManager
+    @State private var diagnosticsCopied = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
             HStack(spacing: 12) {
                 Image(nsImage: NSApplication.shared.applicationIconImage)
                     .resizable()
@@ -69,6 +72,27 @@ struct SettingsView: View {
                 .padding(.top, 4)
             }
 
+            GroupBox(L10n.string("menu_bar.group", fallback: "Menu Bar")) {
+                VStack(alignment: .leading, spacing: 10) {
+                    Picker(
+                        L10n.string("menu_bar.display", fallback: "Show"),
+                        selection: $settings.menuBarDisplayMode
+                    ) {
+                        Text(L10n.string("menu_bar.both", fallback: "Both")).tag(MenuBarDisplayMode.both)
+                        Text(L10n.string("menu_bar.five_hour", fallback: "5-hour only")).tag(MenuBarDisplayMode.fiveHour)
+                        Text(L10n.string("menu_bar.weekly", fallback: "Weekly only")).tag(MenuBarDisplayMode.weekly)
+                    }
+                    .pickerStyle(.segmented)
+
+                    Toggle(
+                        L10n.string("menu_bar.weekly_first", fallback: "Show weekly percentage first"),
+                        isOn: $settings.weeklyFirst
+                    )
+                    .disabled(settings.menuBarDisplayMode != .both)
+                }
+                .padding(.top, 4)
+            }
+
             GroupBox(L10n.string("startup.group", fallback: "Startup")) {
                 VStack(alignment: .leading, spacing: 8) {
                     Toggle(
@@ -119,13 +143,45 @@ struct SettingsView: View {
             }
 
             GroupBox(L10n.string("update.group", fallback: "Updates")) {
-                HStack(spacing: 10) {
-                    updateStatus
-                    Spacer()
-                    Button(L10n.string("update.check", fallback: "Check for Updates")) {
-                        updateChecker.check()
+                VStack(alignment: .leading, spacing: 10) {
+                    Toggle(
+                        L10n.string("update.automatic", fallback: "Check for updates automatically"),
+                        isOn: $settings.automaticUpdateChecks
+                    )
+                    HStack(spacing: 10) {
+                        updateStatus
+                        Spacer()
+                        Button(L10n.string("update.check", fallback: "Check for Updates")) {
+                            updateChecker.check()
+                        }
+                        .disabled(updateChecker.state == .checking)
                     }
-                    .disabled(updateChecker.state == .checking)
+                }
+                .padding(.top, 4)
+            }
+
+            GroupBox(L10n.string("notification.group", fallback: "Notifications")) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Toggle(
+                        L10n.string(
+                            "notification.toggle",
+                            fallback: "Notify me when remaining usage falls below 25%"
+                        ),
+                        isOn: $settings.notificationsEnabled
+                    )
+
+                    Text(notificationStatusText)
+                        .font(.caption)
+                        .foregroundStyle(
+                            notificationManager.authorizationState == .denied ? .orange : .secondary
+                        )
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    if let message = notificationManager.errorMessage {
+                        Text(message)
+                            .font(.caption)
+                            .foregroundStyle(.red)
+                    }
                 }
                 .padding(.top, 4)
             }
@@ -135,13 +191,58 @@ struct SettingsView: View {
                     Text(
                         L10n.string(
                             "privacy.summary",
-                            fallback: "The app does not store tokens, API keys, email addresses, or account identifiers. The Codex path and refresh interval are stored on this Mac; launch at login is managed by macOS Login Items."
+                            fallback: "The app does not store tokens, API keys, email addresses, account identifiers, or usage history. Preferences stay on this Mac; launch at login and notification permission are managed by macOS."
                         )
                     )
                         .fixedSize(horizontal: false, vertical: true)
                 } icon: {
                     Image(systemName: "lock.shield")
                         .foregroundStyle(.green)
+                }
+                .padding(.top, 4)
+            }
+
+            GroupBox(L10n.string("diagnostics.group", fallback: "Diagnostics")) {
+                HStack {
+                    Text(
+                        L10n.string(
+                            "diagnostics.summary",
+                            fallback: "Copies technical status without account details, paths, usage percentages, or error text."
+                        )
+                    )
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    Spacer()
+                    Button(
+                        diagnosticsCopied
+                            ? L10n.string("diagnostics.copied", fallback: "Copied")
+                            : L10n.string("diagnostics.copy", fallback: "Copy Diagnostics")
+                    ) {
+                        copyDiagnostics()
+                    }
+                }
+                .padding(.top, 4)
+            }
+
+            GroupBox(L10n.string("about.group", fallback: "About")) {
+                VStack(alignment: .leading, spacing: 9) {
+                    Text(versionText)
+                        .font(.callout.weight(.medium))
+                    HStack(spacing: 14) {
+                        Link(
+                            L10n.string("about.github", fallback: "GitHub"),
+                            destination: URL(string: "https://github.com/karasahb/codex-usage-bar")!
+                        )
+                        Link(
+                            L10n.string("about.privacy", fallback: "Privacy Policy"),
+                            destination: URL(string: "https://github.com/karasahb/codex-usage-bar/blob/main/PRIVACY.md")!
+                        )
+                        Link(
+                            L10n.string("about.issue", fallback: "Report an Issue"),
+                            destination: URL(string: "https://github.com/karasahb/codex-usage-bar/issues/new/choose")!
+                        )
+                    }
                 }
                 .padding(.top, 4)
             }
@@ -158,11 +259,13 @@ struct SettingsView: View {
                     store.reconnect()
                 }
             }
+            }
+            .padding(22)
         }
-        .padding(22)
-        .frame(width: 520)
+        .frame(width: 560, height: 720)
         .onAppear {
             launchAtLogin.refresh()
+            notificationManager.refreshAuthorization()
         }
     }
 
@@ -222,6 +325,54 @@ struct SettingsView: View {
             "connection.not_found",
             fallback: "The Codex executable has not been found yet."
         )
+    }
+
+    private var notificationStatusText: String {
+        if !settings.notificationsEnabled {
+            return L10n.string("notification.off", fallback: "Notifications are off.")
+        }
+        switch notificationManager.authorizationState {
+        case .unknown:
+            return L10n.string(
+                "notification.permission_pending",
+                fallback: "macOS will ask for permission before the first notification can be delivered."
+            )
+        case .authorized:
+            return L10n.string(
+                "notification.ready",
+                fallback: "Ready. Each limit is reported once when it crosses below 25%."
+            )
+        case .denied:
+            return L10n.string(
+                "notification.denied",
+                fallback: "Notification permission is blocked in macOS System Settings."
+            )
+        }
+    }
+
+    private var versionText: String {
+        let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
+            ?? "development"
+        let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String
+            ?? "development"
+        return L10n.format("about.version", fallback: "Version %@ (%@)", version, build)
+    }
+
+    private func copyDiagnostics() {
+        let report = DiagnosticsReport.current(
+            settings: settings,
+            store: store,
+            launchAtLogin: launchAtLogin,
+            notificationAuthorization: notificationManager.authorizationState
+        )
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+        pasteboard.setString(report, forType: .string)
+        diagnosticsCopied = true
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(2))
+            diagnosticsCopied = false
+        }
     }
 
     private func chooseCodexExecutable() {

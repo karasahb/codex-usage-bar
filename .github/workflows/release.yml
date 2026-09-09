@@ -24,7 +24,8 @@ jobs:
         run: Scripts/check_repository.sh
       - name: Test
         run: swift test
-      - name: Require Apple signing secrets
+      - name: Detect Apple signing configuration
+        id: signing
         shell: bash
         run: |
           required=(
@@ -35,13 +36,20 @@ jobs:
             APPLE_TEAM_ID
             APPLE_APP_SPECIFIC_PASSWORD
           )
+          enabled=true
           for name in "${required[@]}"; do
             if [[ -z "${!name}" ]]; then
-              echo "Missing required GitHub Actions secret: $name"
-              exit 1
+              enabled=false
             fi
           done
+          echo "enabled=$enabled" >> "$GITHUB_OUTPUT"
+          if [[ "$enabled" == true ]]; then
+            echo "A Developer ID-signed and notarized release will be created."
+          else
+            echo "Apple signing secrets are incomplete; an ad-hoc-signed release will be created."
+          fi
       - name: Import Developer ID certificate
+        if: steps.signing.outputs.enabled == 'true'
         shell: bash
         run: |
           keychain="$RUNNER_TEMP/codex-usage-bar.keychain-db"
@@ -53,26 +61,47 @@ jobs:
           security import "$certificate" -k "$keychain" -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple: -s -k codex-usage-bar-build "$keychain"
           security list-keychains -d user -s "$keychain"
-      - name: Build signed application
+      - name: Build application
+        shell: bash
         run: |
-          CODEX_USAGE_BAR_VERSION="${GITHUB_REF_NAME#v}" \
-          CODEX_USAGE_BAR_SIGN_IDENTITY="$APPLE_SIGNING_IDENTITY" \
-          Scripts/package_app.sh
+          if [[ "${{ steps.signing.outputs.enabled }}" == true ]]; then
+            CODEX_USAGE_BAR_VERSION="${GITHUB_REF_NAME#v}" \
+            CODEX_USAGE_BAR_SIGN_IDENTITY="$APPLE_SIGNING_IDENTITY" \
+            Scripts/package_app.sh
+          else
+            CODEX_USAGE_BAR_VERSION="${GITHUB_REF_NAME#v}" Scripts/package_app.sh
+          fi
       - name: Notarize and staple
+        if: steps.signing.outputs.enabled == 'true'
         run: |
           CODEX_USAGE_BAR_SIGN_IDENTITY="$APPLE_SIGNING_IDENTITY" \
           Scripts/notarize_app.sh \
             "dist/Codex Usage Bar.app" \
             "dist/Codex-Usage-Bar-${GITHUB_REF_NAME#v}.zip"
+      - name: Archive ad-hoc build
+        if: steps.signing.outputs.enabled != 'true'
+        shell: bash
+        run: |
+          archive="dist/Codex-Usage-Bar-${GITHUB_REF_NAME#v}-ad-hoc.zip"
+          ditto -c -k --sequesterRsrc --keepParent "dist/Codex Usage Bar.app" "$archive"
+          shasum -a 256 "$archive" > "$archive.sha256"
       - name: Publish GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          if [[ "${{ steps.signing.outputs.enabled }}" == true ]]; then
+            archive="dist/Codex-Usage-Bar-${GITHUB_REF_NAME#v}.zip"
+            release_note="Developer ID-signed, hardened, notarized, and stapled macOS build."
+          else
+            archive="dist/Codex-Usage-Bar-${GITHUB_REF_NAME#v}-ad-hoc.zip"
+            release_note="Ad-hoc-signed macOS build. On first launch, Control-click the app and choose Open if Gatekeeper blocks it."
+          fi
           gh release create "$GITHUB_REF_NAME" \
-            "dist/Codex-Usage-Bar-${GITHUB_REF_NAME#v}.zip" \
-            "dist/Codex-Usage-Bar-${GITHUB_REF_NAME#v}.zip.sha256" \
+            "$archive" \
+            "$archive.sha256" \
             --generate-notes \
+            --notes "$release_note" \
             --verify-tag
       - name: Delete temporary keychain
-        if: always()
+        if: always() && steps.signing.outputs.enabled == 'true'
         run: security delete-keychain "$RUNNER_TEMP/codex-usage-bar.keychain-db" || true

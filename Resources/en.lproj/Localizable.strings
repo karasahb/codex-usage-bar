@@ -21,6 +21,13 @@
 "refresh.seconds" = "%d seconds";
 "refresh.now" = "Refresh now";
 
+"menu_bar.group" = "Menu Bar";
+"menu_bar.display" = "Show";
+"menu_bar.both" = "Both";
+"menu_bar.five_hour" = "5-hour only";
+"menu_bar.weekly" = "Weekly only";
+"menu_bar.weekly_first" = "Show weekly percentage first";
+
 "startup.group" = "Startup";
 "startup.toggle" = "Launch at login";
 "startup.approval_required" = "macOS approval is required.";
@@ -29,7 +36,7 @@
 "startup.change_failed" = "Could not change launch at login: %@";
 
 "privacy.group" = "Privacy";
-"privacy.summary" = "The app does not store tokens, API keys, email addresses, or account identifiers. The Codex path and refresh interval are stored on this Mac; launch at login is managed by macOS Login Items.";
+"privacy.summary" = "The app does not store tokens, API keys, email addresses, account identifiers, or usage history. Preferences stay on this Mac; launch at login and notification permission are managed by macOS.";
 
 "usage.title" = "Codex Usage";
 "usage.five_hour" = "5-hour";
@@ -45,12 +52,17 @@
 "usage.tooltip" = "Remaining Codex usage";
 "usage.accessibility_loading" = "Loading Codex usage information";
 "usage.accessibility" = "Remaining Codex usage: 5-hour %@ percent, weekly %@ percent";
+"usage.accessibility_custom" = "Remaining Codex usage: %@";
+"usage.accessibility_five_hour" = "5-hour %@ percent";
+"usage.accessibility_weekly" = "weekly %@ percent";
 "usage.unknown" = "unknown";
 
 "date.today" = "Today %@";
 "date.tomorrow" = "Tomorrow %@";
 "date.never_updated" = "Not updated yet";
 "date.last_updated" = "Last updated %@";
+"date.now" = "now";
+"date.with_countdown" = "%@ (in %@)";
 
 "error.codex_not_found" = "Codex was not found. Make sure ChatGPT/Codex is installed.";
 "error.invalid_codex_path" = "The Codex path in Settings is not a valid executable.";
@@ -66,6 +78,27 @@
 "update.available" = "Version %@ is available.";
 "update.failed" = "Could not check for updates: %@";
 "update.banner" = "Version %@ is available";
+"update.automatic" = "Check for updates automatically";
+
+"notification.group" = "Notifications";
+"notification.toggle" = "Notify me when remaining usage falls below 25%";
+"notification.off" = "Notifications are off.";
+"notification.permission_pending" = "macOS will ask for permission before the first notification can be delivered.";
+"notification.ready" = "Ready. Each limit is reported once when it crosses below 25%.";
+"notification.denied" = "Notification permission is blocked in macOS System Settings.";
+"notification.title" = "Codex usage is running low";
+"notification.body" = "%@ remaining usage is now %%%d.";
+
+"diagnostics.group" = "Diagnostics";
+"diagnostics.summary" = "Copies technical status without account details, paths, usage percentages, or error text.";
+"diagnostics.copy" = "Copy Diagnostics";
+"diagnostics.copied" = "Copied";
+
+"about.group" = "About";
+"about.version" = "Version %@ (%@)";
+"about.github" = "GitHub";
+"about.privacy" = "Privacy Policy";
+"about.issue" = "Report an Issue";
 
 "onboarding.title" = "Welcome to Codex Usage Bar";
 "onboarding.subtitle" = "Your remaining Codex limits, always visible in the menu bar.";
@@ -77,3 +110,6 @@
 "onboarding.privacy_title" = "Private by design";
 "onboarding.privacy_body" = "No API key, token, email address, or account identifier is stored. Authentication stays with your existing Codex installation.";
 "onboarding.start" = "Start Using Codex Usage Bar";
+"onboarding.location_title" = "Move to Applications";
+"onboarding.location_body" = "For reliable launch-at-login behavior, move Codex Usage Bar to the Applications folder before continuing.";
+"onboarding.launch_at_login" = "Launch Codex Usage Bar when I log in";

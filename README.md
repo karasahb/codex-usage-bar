@@ -13,14 +13,17 @@
 ## Features
 
 - Shows the remaining 5-hour and weekly percentages as `96% | 36%`
-- Displays exact reset dates and times in the popover
+- Can show both limits, either limit alone, and swap their order
+- Displays exact reset dates and times together with a live countdown
 - Refreshes every 15–120 seconds and reacts to live rate-limit notifications
 - Uses four color bands: green, yellow, orange, and red
 - Shows the detected ChatGPT plan and available reset-credit count
 - Lets you select the ChatGPT/Codex app or `codex` executable in Settings
 - Optionally launches at login through the native macOS Login Items service
-- Includes a first-run connection check and onboarding window
-- Checks GitHub Releases for updates and links to the download when one is available
+- Includes a first-run connection check, Applications-folder warning, and launch-at-login choice
+- Optionally notifies once when either remaining limit crosses below 25%
+- Checks GitHub Releases for updates, with an opt-out and manual check
+- Copies a privacy-safe diagnostics report and links to GitHub, privacy, and issue reporting
 - Provides English and Turkish user interfaces based on the macOS language setting
 - Runs as a menu bar accessory without a Dock icon
 
@@ -28,13 +31,15 @@
 
 Codex Usage Bar never asks for, stores, or logs an API key, OAuth token, email address, or account ID. It launches the locally installed Codex App Server and requests only the rate-limit snapshot. Authentication remains managed by your existing local Codex installation.
 
-Only these preferences are stored in macOS `UserDefaults`:
+Only non-sensitive preferences are stored in macOS `UserDefaults`:
 
 - Optional path to the ChatGPT/Codex app or `codex` executable
 - Refresh interval
 - Whether the one-time onboarding window has been completed
+- Menu bar display mode and percentage order
+- Whether automatic update checks and low-usage notifications are enabled
 
-The launch-at-login choice is stored by the native macOS Login Items service. The app checks the public GitHub Releases API at launch and approximately every six hours, sending only its app version in the user-agent. It never sends Codex credentials or account data to GitHub and never downloads or installs an update automatically.
+The launch-at-login choice and notification authorization are managed by macOS. Usage snapshots and notification threshold comparisons stay in memory and are discarded when the app exits. The app checks the public GitHub Releases API at launch and approximately every six hours when automatic checks are enabled, sending only its app version in the user-agent. It never sends Codex credentials or account data to GitHub and never downloads or installs an update automatically.
 
 See [PRIVACY.md](PRIVACY.md) for the complete data-flow description.
 
@@ -46,9 +51,9 @@ See [PRIVACY.md](PRIVACY.md) for the complete data-flow description.
 
 ## Install a release
 
-1. Download and extract `Codex-Usage-Bar.zip` from GitHub Releases.
+1. Download and extract the `.zip` file from GitHub Releases.
 2. Move `Codex Usage Bar.app` to the Applications folder.
-3. Releases signed and notarized by the maintainer open normally. Local ad-hoc builds may require Control-clicking the app and selecting **Open**, or using **System Settings → Privacy & Security → Open Anyway**.
+3. The current public release is ad-hoc signed because the project does not yet use a paid Apple Developer membership. If macOS blocks the first launch, Control-click the app, select **Open**, and confirm. You can also use **System Settings → Privacy & Security → Open Anyway**.
 4. The app detects a signed-in ChatGPT Desktop, Codex Desktop, or Codex CLI installation automatically.
 
 ## Run from source
@@ -80,7 +85,7 @@ CODEX_USAGE_BAR_SIGN_IDENTITY="Developer ID Application: Example (TEAMID)" \
 CODEX_USAGE_BAR_NOTARY_PROFILE="notarytool-profile" Scripts/notarize_app.sh
 ```
 
-The release workflow requires these encrypted GitHub Actions secrets and refuses to publish an unnotarized build:
+When all of the following encrypted GitHub Actions secrets are available, the release workflow creates a Developer ID-signed and notarized build:
 
 - `APPLE_CERTIFICATE_P12_BASE64`
 - `APPLE_CERTIFICATE_PASSWORD`
@@ -89,9 +94,11 @@ The release workflow requires these encrypted GitHub Actions secrets and refuses
 - `APPLE_TEAM_ID`
 - `APPLE_APP_SPECIFIC_PASSWORD`
 
+Without a complete signing configuration, the same workflow intentionally publishes an explicitly named `-ad-hoc.zip` archive and documents the first-launch Gatekeeper step in the release notes.
+
 ## Settings
 
-Open the menu bar popover and select the gear button. By default, the app checks common ChatGPT, Codex Desktop, Homebrew, and `PATH` locations. A custom executable path, refresh interval, and launch-at-login preference can be selected without changing the source code. Launch at login is off by default and is managed by the native macOS Login Items service.
+Open the menu bar popover and select the gear button. You can choose the displayed limits and their order, refresh interval, automatic update checks, low-usage notifications, launch at login, and an optional custom Codex executable. Launch at login and notifications are off by default. The diagnostics button copies only coarse technical state—it excludes local paths, account details, usage percentages, and error text.
 
 ## How it works
 

@@ -3,10 +3,18 @@ import SwiftUI
 
 @MainActor
 final class OnboardingWindowController: NSWindowController {
-    init(store: UsageStore, onFinish: @escaping () -> Void) {
+    init(
+        store: UsageStore,
+        launchAtLogin: LaunchAtLoginManager,
+        onFinish: @escaping () -> Void
+    ) {
         super.init(window: nil)
 
-        let view = OnboardingView(store: store, onFinish: onFinish)
+        let view = OnboardingView(
+            store: store,
+            launchAtLogin: launchAtLogin,
+            onFinish: onFinish
+        )
         let window = NSWindow(contentViewController: NSHostingController(rootView: view))
         window.title = "Codex Usage Bar"
         window.styleMask = [.titled, .closable]

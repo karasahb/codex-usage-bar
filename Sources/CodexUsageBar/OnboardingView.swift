@@ -3,6 +3,7 @@ import SwiftUI
 
 struct OnboardingView: View {
     @ObservedObject var store: UsageStore
+    @ObservedObject var launchAtLogin: LaunchAtLoginManager
     let onFinish: () -> Void
 
     var body: some View {
@@ -45,6 +46,36 @@ struct OnboardingView: View {
                 )
 
                 connectionRow
+
+                if !ApplicationLocation.isInApplicationsDirectory() {
+                    OnboardingRow(
+                        image: "folder.badge.questionmark",
+                        title: L10n.string("onboarding.location_title", fallback: "Move to Applications"),
+                        detail: L10n.string(
+                            "onboarding.location_body",
+                            fallback: "For reliable launch-at-login behavior, move Codex Usage Bar to the Applications folder before continuing."
+                        ),
+                        color: .orange
+                    )
+                }
+            }
+
+            VStack(alignment: .leading, spacing: 6) {
+                Toggle(
+                    L10n.string("onboarding.launch_at_login", fallback: "Launch Codex Usage Bar when I log in"),
+                    isOn: Binding(
+                        get: { launchAtLogin.state.isSelected },
+                        set: { launchAtLogin.setEnabled($0) }
+                    )
+                )
+                .disabled(launchAtLogin.state == .unavailable)
+
+                if launchAtLogin.state == .requiresApproval {
+                    Button(L10n.string("startup.open_login_items", fallback: "Open Login Items")) {
+                        launchAtLogin.openSystemSettings()
+                    }
+                    .controlSize(.small)
+                }
             }
 
             HStack {
@@ -65,6 +96,7 @@ struct OnboardingView: View {
         }
         .padding(28)
         .frame(width: 600)
+        .onAppear { launchAtLogin.refresh() }
     }
 
     @ViewBuilder

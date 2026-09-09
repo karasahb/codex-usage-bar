@@ -21,6 +21,13 @@
 "refresh.seconds" = "%d saniye";
 "refresh.now" = "Şimdi yenile";
 
+"menu_bar.group" = "Menü Çubuğu";
+"menu_bar.display" = "Göster";
+"menu_bar.both" = "İkisi";
+"menu_bar.five_hour" = "Yalnızca 5 saatlik";
+"menu_bar.weekly" = "Yalnızca haftalık";
+"menu_bar.weekly_first" = "Haftalık yüzdeyi önce göster";
+
 "startup.group" = "Başlangıç";
 "startup.toggle" = "Oturum açıldığında başlat";
 "startup.approval_required" = "macOS onayı gerekiyor.";
@@ -29,7 +36,7 @@
 "startup.change_failed" = "Otomatik başlangıç değiştirilemedi: %@";
 
 "privacy.group" = "Gizlilik";
-"privacy.summary" = "Uygulama token, API anahtarı, e-posta veya hesap kimliği kaydetmez. Codex yolu ve yenileme aralığı bu Mac'te; otomatik başlangıç tercihi macOS Giriş Öğeleri'nde saklanır.";
+"privacy.summary" = "Uygulama token, API anahtarı, e-posta, hesap kimliği veya kullanım geçmişi kaydetmez. Tercihler bu Mac'te kalır; otomatik başlangıç ve bildirim izni macOS tarafından yönetilir.";
 
 "usage.title" = "Codex Kullanımı";
 "usage.five_hour" = "5 saatlik";
@@ -45,12 +52,17 @@
 "usage.tooltip" = "Codex kalan kullanım";
 "usage.accessibility_loading" = "Codex kullanım bilgisi yükleniyor";
 "usage.accessibility" = "Codex kalan kullanım: 5 saatlik yüzde %@, haftalık yüzde %@";
+"usage.accessibility_custom" = "Codex kalan kullanım: %@";
+"usage.accessibility_five_hour" = "5 saatlik yüzde %@";
+"usage.accessibility_weekly" = "haftalık yüzde %@";
 "usage.unknown" = "bilinmiyor";
 
 "date.today" = "Bugün %@";
 "date.tomorrow" = "Yarın %@";
 "date.never_updated" = "Henüz güncellenmedi";
 "date.last_updated" = "Son güncelleme %@";
+"date.now" = "şimdi";
+"date.with_countdown" = "%@ (%@ sonra)";
 
 "error.codex_not_found" = "Codex bulunamadı. ChatGPT/Codex uygulamasının kurulu olduğundan emin olun.";
 "error.invalid_codex_path" = "Ayarlardaki Codex yolu geçerli bir çalıştırılabilir dosya değil.";
@@ -66,6 +78,27 @@
 "update.available" = "%@ sürümü kullanılabilir.";
 "update.failed" = "Güncellemeler denetlenemedi: %@";
 "update.banner" = "%@ sürümü kullanılabilir";
+"update.automatic" = "Güncellemeleri otomatik denetle";
+
+"notification.group" = "Bildirimler";
+"notification.toggle" = "Kalan kullanım %25'in altına düştüğünde bildir";
+"notification.off" = "Bildirimler kapalı.";
+"notification.permission_pending" = "İlk bildirim gönderilmeden önce macOS izin isteyecek.";
+"notification.ready" = "Hazır. Her limit %25'in altına ilk düştüğünde bir kez bildirilir.";
+"notification.denied" = "Bildirim izni macOS Sistem Ayarları'nda engellenmiş.";
+"notification.title" = "Codex kullanımınız azalıyor";
+"notification.body" = "%@ kalan kullanımınız artık %%%d.";
+
+"diagnostics.group" = "Tanılama";
+"diagnostics.summary" = "Hesap bilgileri, yollar, kullanım yüzdeleri veya hata metni olmadan teknik durumu kopyalar.";
+"diagnostics.copy" = "Tanılamayı Kopyala";
+"diagnostics.copied" = "Kopyalandı";
+
+"about.group" = "Hakkında";
+"about.version" = "Sürüm %@ (%@)";
+"about.github" = "GitHub";
+"about.privacy" = "Gizlilik Politikası";
+"about.issue" = "Sorun Bildir";
 
 "onboarding.title" = "Codex Usage Bar'a Hoş Geldiniz";
 "onboarding.subtitle" = "Kalan Codex limitleriniz her zaman menü çubuğunda.";
@@ -77,3 +110,6 @@
 "onboarding.privacy_title" = "Gizlilik odaklı";
 "onboarding.privacy_body" = "API anahtarı, token, e-posta veya hesap kimliği kaydedilmez. Kimlik doğrulama mevcut Codex kurulumunuzda kalır.";
 "onboarding.start" = "Codex Usage Bar'ı Kullanmaya Başla";
+"onboarding.location_title" = "Applications Klasörüne Taşıyın";
+"onboarding.location_body" = "Otomatik başlangıcın güvenilir çalışması için devam etmeden önce Codex Usage Bar'ı Applications klasörüne taşıyın.";
+"onboarding.launch_at_login" = "Oturum açtığımda Codex Usage Bar'ı başlat";

@@ -103,6 +103,33 @@ enum ResetDateFormatter {
         return DateFormatter.localizedString(from: date, dateStyle: .medium, timeStyle: .short)
     }
 
+    static func countdown(until date: Date?, relativeTo now: Date = Date()) -> String {
+        guard let date else { return "—" }
+        let interval = date.timeIntervalSince(now)
+        guard interval > 0 else {
+            return L10n.string("date.now", fallback: "now")
+        }
+
+        let formatter = DateComponentsFormatter()
+        formatter.calendar = .autoupdatingCurrent
+        formatter.unitsStyle = .abbreviated
+        formatter.allowedUnits = interval >= 86_400 ? [.day, .hour] : [.hour, .minute]
+        formatter.maximumUnitCount = 2
+        formatter.zeroFormattingBehavior = .dropAll
+        return formatter.string(from: interval)
+            ?? L10n.string("date.now", fallback: "now")
+    }
+
+    static func resetDescription(for date: Date?, relativeTo now: Date = Date()) -> String {
+        guard date != nil else { return "—" }
+        return L10n.format(
+            "date.with_countdown",
+            fallback: "%@ (in %@)",
+            string(for: date, relativeTo: now),
+            countdown(until: date, relativeTo: now)
+        )
+    }
+
     static func updateTime(_ date: Date?) -> String {
         guard let date else {
             return L10n.string("date.never_updated", fallback: "Not updated yet")
