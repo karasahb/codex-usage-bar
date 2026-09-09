@@ -40,7 +40,13 @@ final class StatusItemController: NSObject {
         settings.$menuBarDisplayMode
             .combineLatest(settings.$weeklyFirst)
             .dropFirst()
-            .sink { [weak self] _ in self?.updateTitle(store.snapshot) }
+            .sink { [weak self] mode, weeklyFirst in
+                self?.updateTitle(
+                    store.snapshot,
+                    mode: mode,
+                    weeklyFirst: weeklyFirst
+                )
+            }
             .store(in: &cancellables)
 
         updateTitle(nil)
@@ -57,21 +63,27 @@ final class StatusItemController: NSObject {
         }
     }
 
-    private func updateTitle(_ snapshot: UsageDisplaySnapshot?) {
+    private func updateTitle(
+        _ snapshot: UsageDisplaySnapshot?,
+        mode requestedMode: MenuBarDisplayMode? = nil,
+        weeklyFirst requestedWeeklyFirst: Bool? = nil
+    ) {
         guard let button = statusItem.button else { return }
+        let mode = requestedMode ?? settings.menuBarDisplayMode
+        let weeklyFirst = requestedWeeklyFirst ?? settings.weeklyFirst
         let title = NSMutableAttributedString()
         let base: [NSAttributedString.Key: Any] = [
             .font: NSFont.monospacedDigitSystemFont(ofSize: 12, weight: .medium)
         ]
 
         let windows: [RateLimitWindow?]
-        switch settings.menuBarDisplayMode {
+        switch mode {
         case .fiveHour:
             windows = [snapshot?.fiveHour]
         case .weekly:
             windows = [snapshot?.weekly]
         case .both:
-            windows = settings.weeklyFirst
+            windows = weeklyFirst
                 ? [snapshot?.weekly, snapshot?.fiveHour]
                 : [snapshot?.fiveHour, snapshot?.weekly]
         }
@@ -85,7 +97,9 @@ final class StatusItemController: NSObject {
             append(window: window, to: title, base: base)
         }
         button.attributedTitle = title
-        button.setAccessibilityLabel(accessibilityLabel(snapshot))
+        button.setAccessibilityLabel(
+            accessibilityLabel(snapshot, mode: mode, weeklyFirst: weeklyFirst)
+        )
     }
 
     private func append(
@@ -105,7 +119,11 @@ final class StatusItemController: NSObject {
         title.append(NSAttributedString(string: "\(window.remainingPercent)%", attributes: attributes))
     }
 
-    private func accessibilityLabel(_ snapshot: UsageDisplaySnapshot?) -> String {
+    private func accessibilityLabel(
+        _ snapshot: UsageDisplaySnapshot?,
+        mode: MenuBarDisplayMode,
+        weeklyFirst: Bool
+    ) -> String {
         guard let snapshot else {
             return L10n.string(
                 "usage.accessibility_loading",
@@ -124,10 +142,10 @@ final class StatusItemController: NSObject {
             snapshot.weekly?.remainingPercent.description ?? unknown
         )
         let values: [String]
-        switch settings.menuBarDisplayMode {
+        switch mode {
         case .fiveHour: values = [five]
         case .weekly: values = [week]
-        case .both: values = settings.weeklyFirst ? [week, five] : [five, week]
+        case .both: values = weeklyFirst ? [week, five] : [five, week]
         }
         return L10n.format(
             "usage.accessibility_custom",

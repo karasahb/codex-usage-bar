@@ -45,6 +45,8 @@ Otomatik denetim açıkken uygulama açılışta ve yaklaşık altı saatte bir 
 3. Proje henüz ücretli Apple Developer üyeliği kullanmadığı için güncel herkese açık paket ad-hoc imzalıdır. macOS ilk açılışı engellerse uygulamaya Control tuşuyla tıklayın, **Aç** seçeneğine basıp onaylayın. Alternatif olarak **Sistem Ayarları → Gizlilik ve Güvenlik → Yine de Aç** yolunu kullanın.
 4. Uygulama, giriş yapılmış ChatGPT Desktop, Codex Desktop veya Codex CLI kurulumunu otomatik bulur.
 
+Uygulama Applications dışında çalışıyorsa Ayarlar'da **Applications'a Kopyala ve Etkinleştir** seçeneği görünür. Bu işlem uygulamayı güvenli biçimde kopyalayıp yeniden açar ve kurulu kopyadan otomatik başlangıç kaydı ister. Applications içindeki mevcut bir kopyanın üzerine yazılmaz.
+
 ## Çalıştırma
 
 ```bash

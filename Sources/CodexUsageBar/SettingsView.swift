@@ -7,6 +7,7 @@ struct SettingsView: View {
     @ObservedObject var launchAtLogin: LaunchAtLoginManager
     @ObservedObject var updateChecker: UpdateChecker
     @ObservedObject var notificationManager: UsageNotificationManager
+    @ObservedObject var applicationInstaller: ApplicationInstaller
     @State private var diagnosticsCopied = false
 
     var body: some View {
@@ -130,9 +131,42 @@ struct SettingsView: View {
                         )
                             .font(.caption)
                             .foregroundStyle(.secondary)
+
+                        if applicationInstaller.canInstallCurrentApp {
+                            Button {
+                                applicationInstaller.copyToApplicationsAndRelaunch()
+                            } label: {
+                                if applicationInstaller.state == .copying {
+                                    HStack(spacing: 7) {
+                                        ProgressView().controlSize(.small)
+                                        Text(
+                                            L10n.string(
+                                                "startup.installing",
+                                                fallback: "Copying to Applications…"
+                                            )
+                                        )
+                                    }
+                                } else {
+                                    Text(
+                                        L10n.string(
+                                            "startup.install_and_enable",
+                                            fallback: "Copy to Applications and Enable"
+                                        )
+                                    )
+                                }
+                            }
+                            .disabled(applicationInstaller.state == .copying)
+                        }
                     }
 
                     if let message = launchAtLogin.errorMessage {
+                        Text(message)
+                            .font(.caption)
+                            .foregroundStyle(.red)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+
+                    if let message = applicationInstaller.errorMessage {
                         Text(message)
                             .font(.caption)
                             .foregroundStyle(.red)

@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-09-10
+
+### Fixed
+
+- Menu bar display and ordering choices now apply immediately instead of waiting for another refresh event
+- Release checksum files now use portable archive names
+
+### Added
+
+- One-click copy to Applications, relaunch, and launch-at-login activation when the app is running elsewhere
+
 ## [1.1.0] - 2026-09-10
 
 ### Added

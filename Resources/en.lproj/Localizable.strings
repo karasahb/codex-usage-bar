@@ -34,6 +34,11 @@
 "startup.open_login_items" = "Open Login Items";
 "startup.unavailable" = "This feature is available only in the packaged app in the Applications folder.";
 "startup.change_failed" = "Could not change launch at login: %@";
+"startup.install_and_enable" = "Copy to Applications and Enable";
+"startup.installing" = "Copying to Applications…";
+"startup.destination_exists" = "Codex Usage Bar already exists in Applications. Open or remove that copy first.";
+"startup.install_failed" = "Could not copy the app to Applications: %@";
+"startup.install_failed_unknown" = "The copied app could not be opened.";
 
 "privacy.group" = "Privacy";
 "privacy.summary" = "The app does not store tokens, API keys, email addresses, account identifiers, or usage history. Preferences stay on this Mac; launch at login and notification permission are managed by macOS.";

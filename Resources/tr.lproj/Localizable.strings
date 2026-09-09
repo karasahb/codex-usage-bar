@@ -34,6 +34,11 @@
 "startup.open_login_items" = "Giriş Öğeleri'ni Aç";
 "startup.unavailable" = "Bu özellik yalnızca Applications klasöründeki paketlenmiş uygulamada kullanılabilir.";
 "startup.change_failed" = "Otomatik başlangıç değiştirilemedi: %@";
+"startup.install_and_enable" = "Applications'a Kopyala ve Etkinleştir";
+"startup.installing" = "Applications'a kopyalanıyor…";
+"startup.destination_exists" = "Applications klasöründe Codex Usage Bar zaten var. Önce o kopyayı açın veya kaldırın.";
+"startup.install_failed" = "Uygulama Applications klasörüne kopyalanamadı: %@";
+"startup.install_failed_unknown" = "Kopyalanan uygulama açılamadı.";
 
 "privacy.group" = "Gizlilik";
 "privacy.summary" = "Uygulama token, API anahtarı, e-posta, hesap kimliği veya kullanım geçmişi kaydetmez. Tercihler bu Mac'te kalır; otomatik başlangıç ve bildirim izni macOS tarafından yönetilir.";

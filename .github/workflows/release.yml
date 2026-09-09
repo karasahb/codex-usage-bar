@@ -84,7 +84,11 @@ jobs:
         run: |
           archive="dist/Codex-Usage-Bar-${GITHUB_REF_NAME#v}-ad-hoc.zip"
           ditto -c -k --sequesterRsrc --keepParent "dist/Codex Usage Bar.app" "$archive"
-          shasum -a 256 "$archive" > "$archive.sha256"
+          (
+            cd dist
+            shasum -a 256 "Codex-Usage-Bar-${GITHUB_REF_NAME#v}-ad-hoc.zip" \
+              > "Codex-Usage-Bar-${GITHUB_REF_NAME#v}-ad-hoc.zip.sha256"
+          )
       - name: Publish GitHub release
         env:
           GH_TOKEN: ${{ github.token }}

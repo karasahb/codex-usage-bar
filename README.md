@@ -56,6 +56,8 @@ See [PRIVACY.md](PRIVACY.md) for the complete data-flow description.
 3. The current public release is ad-hoc signed because the project does not yet use a paid Apple Developer membership. If macOS blocks the first launch, Control-click the app, select **Open**, and confirm. You can also use **System Settings → Privacy & Security → Open Anyway**.
 4. The app detects a signed-in ChatGPT Desktop, Codex Desktop, or Codex CLI installation automatically.
 
+If the app is running outside Applications, Settings offers **Copy to Applications and Enable**. It safely copies and relaunches the app, then requests launch-at-login registration from the installed copy. An existing Applications copy is never overwritten.
+
 ## Run from source
 
 ```bash

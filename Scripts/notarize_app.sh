@@ -39,6 +39,11 @@ spctl --assess --type execute --verbose=4 "$app_path"
 
 rm -f "$archive_path"
 ditto -c -k --sequesterRsrc --keepParent "$app_path" "$archive_path"
-shasum -a 256 "$archive_path" > "$archive_path.sha256"
+archive_directory="${archive_path:h}"
+archive_filename="${archive_path:t}"
+(
+    cd "$archive_directory"
+    shasum -a 256 "$archive_filename" > "$archive_filename.sha256"
+)
 
 echo "$archive_path"

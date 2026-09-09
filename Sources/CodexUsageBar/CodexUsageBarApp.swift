@@ -12,7 +12,8 @@ struct CodexUsageBarApp: App {
                 store: appDelegate.store,
                 launchAtLogin: appDelegate.launchAtLogin,
                 updateChecker: appDelegate.updateChecker,
-                notificationManager: appDelegate.notificationManager
+                notificationManager: appDelegate.notificationManager,
+                applicationInstaller: appDelegate.applicationInstaller
             )
         }
     }
@@ -22,6 +23,7 @@ struct CodexUsageBarApp: App {
 final class AppDelegate: NSObject, NSApplicationDelegate {
     let settings = AppSettings()
     let launchAtLogin = LaunchAtLoginManager()
+    let applicationInstaller = ApplicationInstaller()
     lazy var updateChecker = UpdateChecker(settings: settings)
     lazy var store = UsageStore(settings: settings)
     lazy var notificationManager = UsageNotificationManager(settings: settings, store: store)
@@ -38,6 +40,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         store.start()
         updateChecker.start()
         notificationManager.start()
+
+        if ProcessInfo.processInfo.environment[
+            ApplicationInstaller.enableLaunchAtLoginEnvironmentKey
+        ] == "1" {
+            launchAtLogin.setEnabled(true)
+        }
 
         if !settings.hasCompletedOnboarding {
             let controller = OnboardingWindowController(
