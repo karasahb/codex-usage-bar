@@ -1,0 +1,79 @@
+"app.subtitle" = "Bağlantı ve uygulama ayarları";
+"common.settings" = "Ayarlar";
+"common.quit" = "Çık";
+"common.choose" = "Seç";
+"common.retry" = "Tekrar Dene";
+"common.download" = "İndir";
+
+"connection.group" = "Codex Bağlantısı";
+"connection.auto_detect" = "Otomatik algıla";
+"connection.choose" = "Seç…";
+"connection.use_automatic" = "Otomatik Bul";
+"connection.path_in_use" = "Kullanılan yol: %@";
+"connection.path_detected" = "Otomatik bulunan: %@";
+"connection.invalid_path" = "Seçilen yol geçerli bir Codex uygulaması veya çalıştırılabilir dosya değil.";
+"connection.not_found" = "Codex çalıştırılabilir dosyası henüz bulunamadı.";
+"connection.refresh" = "Bağlantıyı Yenile";
+"connection.file_picker_title" = "ChatGPT/Codex uygulamasını veya codex dosyasını seçin";
+
+"refresh.group" = "Yenileme";
+"refresh.frequency" = "Kontrol sıklığı";
+"refresh.seconds" = "%d saniye";
+"refresh.now" = "Şimdi yenile";
+
+"startup.group" = "Başlangıç";
+"startup.toggle" = "Oturum açıldığında başlat";
+"startup.approval_required" = "macOS onayı gerekiyor.";
+"startup.open_login_items" = "Giriş Öğeleri'ni Aç";
+"startup.unavailable" = "Bu özellik yalnızca Applications klasöründeki paketlenmiş uygulamada kullanılabilir.";
+"startup.change_failed" = "Otomatik başlangıç değiştirilemedi: %@";
+
+"privacy.group" = "Gizlilik";
+"privacy.summary" = "Uygulama token, API anahtarı, e-posta veya hesap kimliği kaydetmez. Codex yolu ve yenileme aralığı bu Mac'te; otomatik başlangıç tercihi macOS Giriş Öğeleri'nde saklanır.";
+
+"usage.title" = "Codex Kullanımı";
+"usage.five_hour" = "5 saatlik";
+"usage.weekly" = "Haftalık";
+"usage.remaining" = "Kalan kullanım";
+"usage.resets" = "Yenilenme: %@";
+"usage.loading" = "Kullanım bilgisi alınıyor…";
+"usage.connected" = "Bağlı";
+"usage.connection_problem" = "Bağlantı sorunu";
+"usage.connecting" = "Bağlanıyor…";
+"usage.reset_credit_one" = "1 yenileme hakkı var";
+"usage.reset_credit_many" = "%d yenileme hakkı var";
+"usage.tooltip" = "Codex kalan kullanım";
+"usage.accessibility_loading" = "Codex kullanım bilgisi yükleniyor";
+"usage.accessibility" = "Codex kalan kullanım: 5 saatlik yüzde %@, haftalık yüzde %@";
+"usage.unknown" = "bilinmiyor";
+
+"date.today" = "Bugün %@";
+"date.tomorrow" = "Yarın %@";
+"date.never_updated" = "Henüz güncellenmedi";
+"date.last_updated" = "Son güncelleme %@";
+
+"error.codex_not_found" = "Codex bulunamadı. ChatGPT/Codex uygulamasının kurulu olduğundan emin olun.";
+"error.invalid_codex_path" = "Ayarlardaki Codex yolu geçerli bir çalıştırılabilir dosya değil.";
+"error.connection_closed" = "Codex bağlantısı kapandı.";
+"error.connection_reconnecting" = "Codex bağlantısı kapandı; yeniden bağlanılacak.";
+"error.invalid_usage_response" = "Codex geçersiz bir kullanım yanıtı döndürdü.";
+"error.invalid_release_version" = "Yayın sürümü okunamadı.";
+
+"update.group" = "Güncellemeler";
+"update.check" = "Güncellemeleri Denetle";
+"update.checking" = "Güncellemeler denetleniyor…";
+"update.current" = "Codex Usage Bar güncel.";
+"update.available" = "%@ sürümü kullanılabilir.";
+"update.failed" = "Güncellemeler denetlenemedi: %@";
+"update.banner" = "%@ sürümü kullanılabilir";
+
+"onboarding.title" = "Codex Usage Bar'a Hoş Geldiniz";
+"onboarding.subtitle" = "Kalan Codex limitleriniz her zaman menü çubuğunda.";
+"onboarding.connection_title" = "Codex bağlantısı";
+"onboarding.connection_ready" = "Bağlandı. Kullanım bilgisi hazır.";
+"onboarding.connection_loading" = "Yerel Codex bağlantınız kontrol ediliyor…";
+"onboarding.menu_title" = "Menü çubuğu";
+"onboarding.menu_body" = "İki yüzde, kalan 5 saatlik ve haftalık kullanımınızı gösterir. Yenilenme saatleri ve ayrıntılar için yüzdelere tıklayın.";
+"onboarding.privacy_title" = "Gizlilik odaklı";
+"onboarding.privacy_body" = "API anahtarı, token, e-posta veya hesap kimliği kaydedilmez. Kimlik doğrulama mevcut Codex kurulumunuzda kalır.";
+"onboarding.start" = "Codex Usage Bar'ı Kullanmaya Başla";

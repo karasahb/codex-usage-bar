@@ -7,7 +7,12 @@ struct CodexUsageBarApp: App {
 
     var body: some Scene {
         Settings {
-            SettingsView(settings: appDelegate.settings, store: appDelegate.store)
+            SettingsView(
+                settings: appDelegate.settings,
+                store: appDelegate.store,
+                launchAtLogin: appDelegate.launchAtLogin,
+                updateChecker: appDelegate.updateChecker
+            )
         }
     }
 }
@@ -15,16 +20,32 @@ struct CodexUsageBarApp: App {
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     let settings = AppSettings()
+    let launchAtLogin = LaunchAtLoginManager()
+    let updateChecker = UpdateChecker()
     lazy var store = UsageStore(settings: settings)
     private var statusController: StatusItemController?
+    private var onboardingController: OnboardingWindowController?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApplication.shared.setActivationPolicy(.accessory)
-        statusController = StatusItemController(store: store)
+        statusController = StatusItemController(store: store, updateChecker: updateChecker)
         store.start()
+        updateChecker.start()
+
+        if !settings.hasCompletedOnboarding {
+            let controller = OnboardingWindowController(store: store) { [weak self] in
+                guard let self else { return }
+                self.settings.hasCompletedOnboarding = true
+                self.onboardingController?.close()
+                self.onboardingController = nil
+            }
+            onboardingController = controller
+            controller.present()
+        }
     }
 
     func applicationWillTerminate(_ notification: Notification) {
         store.stop()
+        updateChecker.stop()
     }
 }

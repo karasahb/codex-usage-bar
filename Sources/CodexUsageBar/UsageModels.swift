@@ -88,28 +88,33 @@ enum ResetDateFormatter {
 
         let calendar = Calendar.current
         let time = DateFormatter()
-        time.locale = Locale(identifier: "tr_TR")
-        time.dateFormat = "HH:mm"
+        time.locale = .autoupdatingCurrent
+        time.timeStyle = .short
+        time.dateStyle = .none
 
         if calendar.isDate(date, inSameDayAs: now) {
-            return "Bugün \(time.string(from: date))"
+            return L10n.format("date.today", fallback: "Today %@", time.string(from: date))
         }
         if let tomorrow = calendar.date(byAdding: .day, value: 1, to: now),
            calendar.isDate(date, inSameDayAs: tomorrow) {
-            return "Yarın \(time.string(from: date))"
+            return L10n.format("date.tomorrow", fallback: "Tomorrow %@", time.string(from: date))
         }
 
-        let full = DateFormatter()
-        full.locale = Locale(identifier: "tr_TR")
-        full.dateFormat = "d MMM, HH:mm"
-        return full.string(from: date)
+        return DateFormatter.localizedString(from: date, dateStyle: .medium, timeStyle: .short)
     }
 
     static func updateTime(_ date: Date?) -> String {
-        guard let date else { return "Henüz güncellenmedi" }
+        guard let date else {
+            return L10n.string("date.never_updated", fallback: "Not updated yet")
+        }
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "tr_TR")
-        formatter.dateFormat = "HH:mm:ss"
-        return "Son güncelleme \(formatter.string(from: date))"
+        formatter.locale = .autoupdatingCurrent
+        formatter.timeStyle = .medium
+        formatter.dateStyle = .none
+        return L10n.format(
+            "date.last_updated",
+            fallback: "Last updated %@",
+            formatter.string(from: date)
+        )
     }
 }

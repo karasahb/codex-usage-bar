@@ -6,6 +6,7 @@ final class AppSettings: ObservableObject {
     private enum Key {
         static let codexExecutablePath = "codexExecutablePath"
         static let refreshInterval = "refreshInterval"
+        static let hasCompletedOnboarding = "hasCompletedOnboarding"
     }
 
     static let allowedRefreshIntervals: [Double] = [15, 30, 60, 120]
@@ -28,6 +29,12 @@ final class AppSettings: ObservableObject {
         }
     }
 
+    @Published var hasCompletedOnboarding: Bool {
+        didSet {
+            defaults.set(hasCompletedOnboarding, forKey: Key.hasCompletedOnboarding)
+        }
+    }
+
     private let defaults: UserDefaults
 
     init(defaults: UserDefaults = .standard) {
@@ -36,6 +43,7 @@ final class AppSettings: ObservableObject {
 
         let savedInterval = defaults.double(forKey: Key.refreshInterval)
         refreshInterval = Self.allowedRefreshIntervals.contains(savedInterval) ? savedInterval : 15
+        hasCompletedOnboarding = defaults.bool(forKey: Key.hasCompletedOnboarding)
     }
 
     var normalizedCodexExecutablePath: String? {

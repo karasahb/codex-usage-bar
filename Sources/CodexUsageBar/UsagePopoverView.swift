@@ -3,6 +3,7 @@ import SwiftUI
 
 struct UsagePopoverView: View {
     @ObservedObject var store: UsageStore
+    @ObservedObject var updateChecker: UpdateChecker
     @Environment(\.openSettings) private var openSettings
 
     var body: some View {
@@ -11,25 +12,25 @@ struct UsagePopoverView: View {
 
             if let snapshot = store.snapshot {
                 UsageWindowCard(
-                    title: "5 saatlik",
+                    title: L10n.string("usage.five_hour", fallback: "5-hour"),
                     systemImage: "clock",
                     window: snapshot.fiveHour
                 )
                 UsageWindowCard(
-                    title: "Haftalık",
+                    title: L10n.string("usage.weekly", fallback: "Weekly"),
                     systemImage: "calendar",
                     window: snapshot.weekly
                 )
 
                 if snapshot.resetCreditCount > 0 {
-                    Label("\(snapshot.resetCreditCount) yenileme hakkı var", systemImage: "arrow.clockwise.circle")
+                    Label(resetCreditText(snapshot.resetCreditCount), systemImage: "arrow.clockwise.circle")
                         .font(.callout.weight(.medium))
                         .foregroundStyle(.secondary)
                 }
             } else if store.errorMessage == nil {
                 HStack(spacing: 10) {
                     ProgressView().controlSize(.small)
-                    Text("Kullanım bilgisi alınıyor…")
+                    Text(L10n.string("usage.loading", fallback: "Loading usage…"))
                         .foregroundStyle(.secondary)
                 }
                 .frame(maxWidth: .infinity, minHeight: 80)
@@ -40,6 +41,20 @@ struct UsagePopoverView: View {
                     .font(.caption)
                     .foregroundStyle(.red)
                     .fixedSize(horizontal: false, vertical: true)
+            }
+
+            if case .available(let version, let url) = updateChecker.state {
+                HStack(spacing: 8) {
+                    Label(
+                        L10n.format("update.banner", fallback: "Version %@ is available", version),
+                        systemImage: "arrow.down.circle.fill"
+                    )
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.blue)
+                    Spacer()
+                    Link(L10n.string("common.download", fallback: "Download"), destination: url)
+                        .font(.caption.weight(.semibold))
+                }
             }
 
             Divider()
@@ -61,7 +76,7 @@ struct UsagePopoverView: View {
                     }
                 }
                 .buttonStyle(.borderless)
-                .help("Şimdi yenile")
+                .help(L10n.string("refresh.now", fallback: "Refresh now"))
 
                 Button {
                     openSettings()
@@ -69,9 +84,9 @@ struct UsagePopoverView: View {
                     Image(systemName: "gearshape")
                 }
                 .buttonStyle(.borderless)
-                .help("Ayarlar")
+                .help(L10n.string("common.settings", fallback: "Settings"))
 
-                Button("Çık") {
+                Button(L10n.string("common.quit", fallback: "Quit")) {
                     NSApplication.shared.terminate(nil)
                 }
                 .buttonStyle(.borderless)
@@ -90,7 +105,7 @@ struct UsagePopoverView: View {
             }
 
             VStack(alignment: .leading, spacing: 1) {
-                Text("Codex Kullanımı")
+                Text(L10n.string("usage.title", fallback: "Codex Usage"))
                     .font(.headline)
                 Text(planName)
                     .font(.caption)
@@ -102,12 +117,18 @@ struct UsagePopoverView: View {
             Circle()
                 .fill(store.errorMessage == nil ? Color.green : Color.red)
                 .frame(width: 7, height: 7)
-                .help(store.errorMessage == nil ? "Bağlı" : "Bağlantı sorunu")
+                .help(
+                    store.errorMessage == nil
+                        ? L10n.string("usage.connected", fallback: "Connected")
+                        : L10n.string("usage.connection_problem", fallback: "Connection problem")
+                )
         }
     }
 
     private var planName: String {
-        guard let plan = store.snapshot?.planType else { return "Bağlanıyor…" }
+        guard let plan = store.snapshot?.planType else {
+            return L10n.string("usage.connecting", fallback: "Connecting…")
+        }
         switch plan {
         case "plus": return "ChatGPT Plus"
         case "pro": return "ChatGPT Pro"
@@ -117,6 +138,17 @@ struct UsagePopoverView: View {
         case "edu", "edu_plus", "edu_pro": return "ChatGPT Edu"
         default: return plan.replacingOccurrences(of: "_", with: " ").capitalized
         }
+    }
+
+    private func resetCreditText(_ count: Int) -> String {
+        if count == 1 {
+            return L10n.string("usage.reset_credit_one", fallback: "1 reset credit available")
+        }
+        return L10n.format(
+            "usage.reset_credit_many",
+            fallback: "%d reset credits available",
+            count
+        )
     }
 }
 
@@ -150,9 +182,15 @@ private struct UsageWindowCard: View {
             .frame(height: 7)
 
             HStack {
-                Text("Kalan kullanım")
+                Text(L10n.string("usage.remaining", fallback: "Remaining usage"))
                 Spacer()
-                Text("Yenilenme: \(ResetDateFormatter.string(for: window?.resetDate))")
+                Text(
+                    L10n.format(
+                        "usage.resets",
+                        fallback: "Resets: %@",
+                        ResetDateFormatter.string(for: window?.resetDate)
+                    )
+                )
             }
             .font(.caption)
             .foregroundStyle(.secondary)

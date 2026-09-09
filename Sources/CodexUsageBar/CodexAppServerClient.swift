@@ -9,13 +9,24 @@ enum AppServerClientError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .executableNotFound:
-            return "Codex bulunamadı. ChatGPT/Codex uygulamasının kurulu olduğundan emin olun."
+            return L10n.string(
+                "error.codex_not_found",
+                fallback: "Codex was not found. Make sure ChatGPT/Codex is installed."
+            )
         case .invalidConfiguredPath:
-            return "Ayarlardaki Codex yolu geçerli bir çalıştırılabilir dosya değil."
+            return L10n.string(
+                "error.invalid_codex_path",
+                fallback: "The Codex path in Settings is not a valid executable."
+            )
         case .processStopped(let message):
-            return message.isEmpty ? "Codex bağlantısı kapandı." : message
+            return message.isEmpty
+                ? L10n.string("error.connection_closed", fallback: "The Codex connection closed.")
+                : message
         case .invalidResponse:
-            return "Codex geçersiz bir kullanım yanıtı döndürdü."
+            return L10n.string(
+                "error.invalid_usage_response",
+                fallback: "Codex returned an invalid usage response."
+            )
         }
     }
 }
@@ -135,7 +146,7 @@ final class CodexAppServerClient {
                 "clientInfo": [
                     "name": "codex_usage_bar",
                     "title": "Codex Usage Bar",
-                    "version": "1.0.0"
+                    "version": Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "development"
                 ],
                 "capabilities": [
                     "experimentalApi": false,
@@ -223,7 +234,14 @@ final class CodexAppServerClient {
     private func handleTermination() {
         resetProcessState()
         guard !isStopping else { return }
-        errorHandler?(AppServerClientError.processStopped("Codex bağlantısı kapandı; yeniden bağlanılacak."))
+        errorHandler?(
+            AppServerClientError.processStopped(
+                L10n.string(
+                    "error.connection_reconnecting",
+                    fallback: "The Codex connection closed; reconnecting."
+                )
+            )
+        )
     }
 
     private func resetProcessState() {

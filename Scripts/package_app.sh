@@ -10,8 +10,8 @@ assets_dir="$project_dir/.build/Assets.xcassets"
 appicon_dir="$assets_dir/AppIcon.appiconset"
 compiled_assets_dir="$(mktemp -d "$project_dir/.build/CompiledAssets.XXXXXX")"
 bundle_identifier="${CODEX_USAGE_BAR_BUNDLE_ID:-app.codexusagebar.macos}"
-app_version="${CODEX_USAGE_BAR_VERSION:-1.0.0}"
-build_number="${CODEX_USAGE_BAR_BUILD:-1}"
+app_version="${CODEX_USAGE_BAR_VERSION:-1.1.0}"
+build_number="${CODEX_USAGE_BAR_BUILD:-2}"
 sign_identity="${CODEX_USAGE_BAR_SIGN_IDENTITY:--}"
 
 cd "$project_dir"
@@ -46,10 +46,16 @@ cp "$binary_path" "$contents_dir/MacOS/CodexUsageBar"
 cp "$project_dir/Resources/Info.plist" "$contents_dir/Info.plist"
 cp "$compiled_assets_dir/AppIcon.icns" "$contents_dir/Resources/AppIcon.icns"
 cp "$compiled_assets_dir/Assets.car" "$contents_dir/Resources/Assets.car"
+cp -R "$project_dir/Resources/en.lproj" "$contents_dir/Resources/"
+cp -R "$project_dir/Resources/tr.lproj" "$contents_dir/Resources/"
 /usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier $bundle_identifier" "$contents_dir/Info.plist"
 /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $app_version" "$contents_dir/Info.plist"
 /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $build_number" "$contents_dir/Info.plist"
 chmod +x "$contents_dir/MacOS/CodexUsageBar"
 
-codesign --force --deep --sign "$sign_identity" "$app_dir"
+sign_arguments=(--force --deep --sign "$sign_identity")
+if [[ "$sign_identity" != "-" ]]; then
+    sign_arguments+=(--options runtime --timestamp)
+fi
+codesign "${sign_arguments[@]}" "$app_dir"
 echo "$app_dir"

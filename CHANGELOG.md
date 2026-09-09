@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-09-09
+
+### Added
+
+- Optional launch at login using the native macOS Login Items service
+- First-run onboarding with a live local Codex connection check
+- Automatic and manual GitHub Releases update checks
+- English and Turkish application localization
+- Developer ID signing, hardened runtime, notarization, stapling, and checksum release automation
+- Release installation and first-launch instructions
+
 ## [1.0.0] - 2026-09-09
 
 ### Added

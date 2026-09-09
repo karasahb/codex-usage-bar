@@ -11,17 +11,68 @@ permissions:
 jobs:
   release:
     runs-on: macos-15
+    env:
+      APPLE_CERTIFICATE_P12_BASE64: ${{ secrets.APPLE_CERTIFICATE_P12_BASE64 }}
+      APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+      APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+      APPLE_ID: ${{ secrets.APPLE_ID }}
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
       - name: Privacy checks
         run: Scripts/check_repository.sh
       - name: Test
         run: swift test
-      - name: Build application
-        run: CODEX_USAGE_BAR_VERSION="${GITHUB_REF_NAME#v}" Scripts/package_app.sh
-      - name: Create archive
-        run: ditto -c -k --sequesterRsrc --keepParent "dist/Codex Usage Bar.app" "dist/Codex-Usage-Bar.zip"
+      - name: Require Apple signing secrets
+        shell: bash
+        run: |
+          required=(
+            APPLE_CERTIFICATE_P12_BASE64
+            APPLE_CERTIFICATE_PASSWORD
+            APPLE_SIGNING_IDENTITY
+            APPLE_ID
+            APPLE_TEAM_ID
+            APPLE_APP_SPECIFIC_PASSWORD
+          )
+          for name in "${required[@]}"; do
+            if [[ -z "${!name}" ]]; then
+              echo "Missing required GitHub Actions secret: $name"
+              exit 1
+            fi
+          done
+      - name: Import Developer ID certificate
+        shell: bash
+        run: |
+          keychain="$RUNNER_TEMP/codex-usage-bar.keychain-db"
+          certificate="$RUNNER_TEMP/developer-id.p12"
+          printf '%s' "$APPLE_CERTIFICATE_P12_BASE64" | openssl base64 -d -A -out "$certificate"
+          security create-keychain -p codex-usage-bar-build "$keychain"
+          security set-keychain-settings -lut 21600 "$keychain"
+          security unlock-keychain -p codex-usage-bar-build "$keychain"
+          security import "$certificate" -k "$keychain" -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k codex-usage-bar-build "$keychain"
+          security list-keychains -d user -s "$keychain"
+      - name: Build signed application
+        run: |
+          CODEX_USAGE_BAR_VERSION="${GITHUB_REF_NAME#v}" \
+          CODEX_USAGE_BAR_SIGN_IDENTITY="$APPLE_SIGNING_IDENTITY" \
+          Scripts/package_app.sh
+      - name: Notarize and staple
+        run: |
+          CODEX_USAGE_BAR_SIGN_IDENTITY="$APPLE_SIGNING_IDENTITY" \
+          Scripts/notarize_app.sh \
+            "dist/Codex Usage Bar.app" \
+            "dist/Codex-Usage-Bar-${GITHUB_REF_NAME#v}.zip"
       - name: Publish GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" "dist/Codex-Usage-Bar.zip" --generate-notes --verify-tag
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            "dist/Codex-Usage-Bar-${GITHUB_REF_NAME#v}.zip" \
+            "dist/Codex-Usage-Bar-${GITHUB_REF_NAME#v}.zip.sha256" \
+            --generate-notes \
+            --verify-tag
+      - name: Delete temporary keychain
+        if: always()
+        run: security delete-keychain "$RUNNER_TEMP/codex-usage-bar.keychain-db" || true

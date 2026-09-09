@@ -11,12 +11,16 @@ final class AppSettingsTests: XCTestCase {
         let settings = AppSettings(defaults: defaults)
         settings.codexExecutablePath = "/Applications/ChatGPT.app"
         settings.refreshInterval = 60
+        settings.hasCompletedOnboarding = true
 
         XCTAssertEqual(defaults.string(forKey: "codexExecutablePath"), "/Applications/ChatGPT.app")
         XCTAssertEqual(defaults.double(forKey: "refreshInterval"), 60)
+        XCTAssertTrue(defaults.bool(forKey: "hasCompletedOnboarding"))
         XCTAssertEqual(defaults.dictionaryRepresentation().keys.filter {
-            $0 == "codexExecutablePath" || $0 == "refreshInterval"
-        }.count, 2)
+            $0 == "codexExecutablePath"
+                || $0 == "refreshInterval"
+                || $0 == "hasCompletedOnboarding"
+        }.count, 3)
     }
 
     func testUnsupportedRefreshIntervalFallsBackToFifteenSeconds() throws {
